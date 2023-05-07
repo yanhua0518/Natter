@@ -17,6 +17,16 @@ except LookupError:
         return codecs.CodecInfo(codecs.ascii_encode, codecs.ascii_decode, name='ascii')
     codecs.register(search_codec)
 
+def saveToFile(port,addr):
+    try:
+        f=open("C:/Users/h/OneDrive/docu/IPv4 "+str(port)+".txt",'w')
+        f.write(str(addr[0])+":"+str(addr[1]))
+        f.close()
+    except Exception as e:
+        print(str(e))
+        return e
+    else:
+        return True
 
 class Logger(object):
     DEBUG = 1
@@ -415,7 +425,8 @@ class HttpTestServer(object):
 
 class Natter(object):
     def __init__(self, source_ip, source_port, test_http = False,
-                 keep_alive_host = "www.qq.com", keep_alive_interval = 10, retry_sec = 3, log_level = Logger.INFO):
+                 keep_alive_host = "www.qq.com", keep_alive_interval = 10,
+                 retry_sec = 3, log_level = Logger.INFO,saveIP=False):
         self.logger = Logger(log_level)
         self.source_ip = source_ip
         self.source_port = source_port
@@ -426,6 +437,7 @@ class Natter(object):
         self.stun_client = StunClient(source_ip, log_level = log_level)
         self.keep_alive_sock = self._init_keep_alive_sock()
         self.http_test_server = HttpTestServer((source_ip, source_port))
+        self.saveIP=saveIP
 
     def _init_keep_alive_sock(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -503,6 +515,8 @@ class Natter(object):
         if not self.test_port_open(source_addr):
             self.logger.error("Local address %s is not available. Check your firewall settings." % source_addr)
             return
+        if self.saveIP:
+            saveToFile(self.source_port,mapped_addr)
         if self.test_port_open(mapped_addr):
             self.logger.info(
                 "The TCP hole punching appears to be successful. "
@@ -545,6 +559,7 @@ def main():
         src_port = -1
         verbose = False
         test_http = False
+        saveIP = False
         l = []
         for arg in sys.argv[1:]:
             if arg[0] == "-":
@@ -552,6 +567,8 @@ def main():
                     verbose = True
                 elif arg == "-t":
                     test_http = True
+                elif arg == "-s":
+                    saveIP = True
                 else:
                     raise ValueError
             else:
@@ -571,7 +588,7 @@ def main():
         log_level=Logger.DEBUG
     else:
         log_level=Logger.INFO
-    natter = Natter(src_host, src_port, test_http=test_http, log_level=log_level)
+    natter = Natter(src_host, src_port, test_http=test_http, log_level=log_level, saveIP=saveIP)
     try:
         natter.tcp_punch()
     except KeyboardInterrupt:
