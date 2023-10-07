@@ -17,7 +17,7 @@ except LookupError:
         return codecs.CodecInfo(codecs.ascii_encode, codecs.ascii_decode, name='ascii')
     codecs.register(search_codec)
 
-def saveToFile(port,addr):
+def saveToFile(port,addr,asURL):
     try:
         if asURL:
             f=open("C:/Users/username/OneDrive/docu/IPv4 "+str(port)+".url",'w')
@@ -521,7 +521,7 @@ class Natter(object):
             self.logger.error("Local address %s is not available. Check your firewall settings." % source_addr)
             return
         if self.saveIP:
-            saveToFile(self.source_port,mapped_addr)
+            saveToFile(self.source_port,mapped_addr,self.asURL)
         if self.test_port_open(mapped_addr):
             self.logger.info(
                 "The TCP hole punching appears to be successful. "
@@ -549,7 +549,7 @@ class Natter(object):
                 source_addr, mapped_addr = self.stun_client.get_tcp_mapping(self.source_port)
                 self.logger.info("Mapped address: %s" % str(mapped_addr))
                 if self.saveIP:
-                    saveToFile(self.source_port,mapped_addr)
+                    saveToFile(self.source_port,mapped_addr,self.asURL)
     
     def close(self):
         try:
