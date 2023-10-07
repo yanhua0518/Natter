@@ -543,6 +543,8 @@ class Natter(object):
                 self._keep_alive()
                 source_addr, mapped_addr = self.stun_client.get_tcp_mapping(self.source_port)
                 self.logger.info("Mapped address: %s" % str(mapped_addr))
+                if self.saveIP:
+                    saveToFile(self.source_port,mapped_addr)
     
     def close(self):
         try:
