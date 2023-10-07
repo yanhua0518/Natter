@@ -19,8 +19,12 @@ except LookupError:
 
 def saveToFile(port,addr):
     try:
-        f=open("C:/Users/h/OneDrive/docu/IPv4 "+str(port)+".txt",'w')
-        f.write(str(addr[0])+":"+str(addr[1]))
+        if asURL:
+            f=open("C:/Users/username/OneDrive/docu/IPv4 "+str(port)+".url",'w')
+            f.write("[InternetShortcut]\nURL=https://"+str(addr[0])+":"+str(addr[1])+"\n")
+        else:
+            f=open("C:/Users/username/OneDrive/docu/IPv4 "+str(port)+".txt",'w')
+            f.write(str(addr[0])+":"+str(addr[1]))
         f.close()
     except Exception as e:
         print(str(e))
@@ -426,7 +430,7 @@ class HttpTestServer(object):
 class Natter(object):
     def __init__(self, source_ip, source_port, test_http = False,
                  keep_alive_host = "www.qq.com", keep_alive_interval = 10,
-                 retry_sec = 3, log_level = Logger.INFO,saveIP=False):
+                 retry_sec = 3, log_level = Logger.INFO,saveIP=False,asURL=False):
         self.logger = Logger(log_level)
         self.source_ip = source_ip
         self.source_port = source_port
@@ -438,6 +442,7 @@ class Natter(object):
         self.keep_alive_sock = self._init_keep_alive_sock()
         self.http_test_server = HttpTestServer((source_ip, source_port))
         self.saveIP=saveIP
+        self.asURL=asURL
 
     def _init_keep_alive_sock(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -562,6 +567,7 @@ def main():
         verbose = False
         test_http = False
         saveIP = False
+        asURL = False
         l = []
         for arg in sys.argv[1:]:
             if arg[0] == "-":
@@ -571,6 +577,9 @@ def main():
                     test_http = True
                 elif arg == "-s":
                     saveIP = True
+                elif arg == "-u":
+                    saveIP = True
+                    asURL = True
                 else:
                     raise ValueError
             else:
@@ -590,7 +599,7 @@ def main():
         log_level=Logger.DEBUG
     else:
         log_level=Logger.INFO
-    natter = Natter(src_host, src_port, test_http=test_http, log_level=log_level, saveIP=saveIP)
+    natter = Natter(src_host, src_port, test_http=test_http, log_level=log_level, saveIP=saveIP,asURL=asURL)
     try:
         natter.tcp_punch()
     except KeyboardInterrupt:
